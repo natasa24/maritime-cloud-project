@@ -6,9 +6,8 @@ import time
 from minio import Minio
 from io import BytesIO
 
-# Ρυθμίσεις
+
 RABBITMQ_HOST = os.getenv('RABBITMQ_HOST', 'rabbitmq')
-# Κωδικοί που ταιριάζουν με το docker-compose.yml
 RABBITMQ_USER = 'user'
 RABBITMQ_PASS = 'password'
 
@@ -43,23 +42,23 @@ def upload_to_minio(payload):
             length=len(data),
             content_type='application/json'
         )
-        print(f"[x] Saved report to Minio: {filename}")
+        print(f"Saved report to Minio: {filename}")
         
     except Exception as e:
-        print(f"[!] Minio Error: {e}")
+        print(f"Minio Error: {e}")
 
 def callback(ch, method, properties, body):
-    print(f" [x] Received Alert: {body}")
+    print(f"Received Alert: {body}")
     try:
         payload = json.loads(body)
         upload_to_minio(payload)
     except Exception as e:
-        print(f" [!] Error processing message: {e}")
+        print(f"Error processing message: {e}")
 
 def main():
-    print(f" [*] Connecting to RabbitMQ at {RABBITMQ_HOST} as {RABBITMQ_USER}...")
+    print(f"Connecting to RabbitMQ at {RABBITMQ_HOST} as {RABBITMQ_USER}...")
     
-    # Ρύθμιση στοιχείων σύνδεσης (Credentials)
+    # Credentials
     credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASS)
     parameters = pika.ConnectionParameters(host=RABBITMQ_HOST, credentials=credentials)
     
@@ -68,13 +67,13 @@ def main():
         try:
             connection = pika.BlockingConnection(parameters)
         except pika.exceptions.AMQPConnectionError:
-            print(" ... RabbitMQ auth failed or not ready, retrying in 5s ...")
+            print("RabbitMQ auth failed or not ready, retrying in 5s")
             time.sleep(5)
 
     channel = connection.channel()
     channel.queue_declare(queue='critical_incidents', durable=True)
 
-    print(' [*] Waiting for messages.')
+    print('Waiting for messages.')
     channel.basic_consume(queue='critical_incidents', on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
