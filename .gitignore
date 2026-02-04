@@ -1,0 +1,6 @@
+tb-data/
+node_red_data/
+tb-logs/
+__pycache__/
+*.log
+.DS_Store

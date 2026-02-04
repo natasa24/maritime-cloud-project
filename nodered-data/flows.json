@@ -1,0 +1,108 @@
+[
+    {
+        "id": "6e8131471af6b6a4",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "2c2b0ed0282f045c",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "thingsboard",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "d7376f87288a8d5c",
+        "type": "inject",
+        "z": "6e8131471af6b6a4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 450,
+        "y": 300,
+        "wires": [
+            [
+                "d2747e849aca77b6"
+            ]
+        ]
+    },
+    {
+        "id": "d2747e849aca77b6",
+        "type": "function",
+        "z": "6e8131471af6b6a4",
+        "name": "function 1",
+        "func": "// Δημιουργία τυχαίας τιμής κατανάλωσης (30 έως 80 τόνοι)\nvar consumption = Math.floor(Math.random() * (80 - 30 + 1)) + 30;\n\nmsg.payload = {\n    fuelConsumption: consumption,\n    vesselStatus: \"Sailing\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 300,
+        "wires": [
+            [
+                "269ac7e35ccec1ed"
+            ]
+        ]
+    },
+    {
+        "id": "269ac7e35ccec1ed",
+        "type": "mqtt out",
+        "z": "6e8131471af6b6a4",
+        "name": "",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "2c2b0ed0282f045c",
+        "x": 830,
+        "y": 300,
+        "wires": []
+    }
+]

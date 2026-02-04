@@ -1,0 +1,77 @@
+version: '3.0'
+
+services:
+  # 1. IoT Platform (Thingsboard)
+  thingsboard:
+    image: thingsboard/tb-postgres
+    restart: always
+    ports:
+      - "8080:9090"
+      - "1883:1883"
+      - "7070:7070"
+      - "5683-5688:5683-5688/udp"
+    environment:
+      - TB_QUEUE_TYPE=in-memory
+    volumes:
+      - my-tb-data:/data
+      - ./tb-logs:/var/log/thingsboard
+
+  # 2. Object Storage (Minio)
+  minio:
+    image: minio/minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+
+  # 3. Message Broker (RabbitMQ)
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+
+  # 4. Identity Management (Keycloak)
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.0
+    restart: always
+    command: start-dev
+    ports:
+      - "8081:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+
+  # 5. Flow Simulator (Node-RED)
+  nodered:
+    image: nodered/node-red
+    restart: always
+    ports:
+      - "1880:1880"
+    volumes:
+      - node_red_data:/data
+
+  # 6. Python Worker (Ο Κώδικας μας)
+  worker:
+    build: ./worker
+    restart: always
+    depends_on:
+      - rabbitmq
+      - minio
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+
+volumes:
+  my-tb-data:
+  node_red_data:
